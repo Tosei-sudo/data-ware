@@ -57,23 +57,24 @@ def create_postings(term_id, document_id, term_frequency):
 # document_master テーブルに新規レコードを追加
 # タームごとに、postings テーブルに出現回数および文書 ID を追加
 # ②タームの文書頻度を更新
+import collections
+
 def create(title, link, body):
     document = create_document(title, 'indexer', link)
     document_id = document['uid']
     
     raw_terms = body.split(u" ")
+    terms_count = collections.Counter(raw_terms)
     
     term_count_dict = {}
-    for raw_term in raw_terms:
-        term = sanitize(raw_term)
-
+    for term, count in terms_count.items():
         term_id = all_terms.get(term, None)
         
         if term_id is None:
             create_term(term)
             term_id = all_terms.get(term)
         
-        term_count_dict[term_id] = term_count_dict.get(term_id, 0) + 1
+        term_count_dict[term_id] = count
     
     for term_id, term_frequency in term_count_dict.items():
         create_postings(term_id, document_id, term_frequency)
@@ -84,6 +85,6 @@ def create(title, link, body):
 load_all_terms()
 # create("鉄道うぃき", "http://example.com", u"鉄道 運行 遅延 遅れ 事故 列車 遅延")
 
-with open('data6.txt') as f:
+with open('data7.txt') as f:
     body = sanitize(f.read())
-    create(u"Wikipedia-内閣", "https://ja.wikipedia.org/wiki/%E5%86%85%E9%96%A3_(%E6%97%A5%E6%9C%AC)", body)
+    create(u"Wikipedia-警察庁", "https://ja.wikipedia.org/wiki/%E5%86%85%E9%96%A3_(%E6%97%A5%E6%9C%AC)", body)
